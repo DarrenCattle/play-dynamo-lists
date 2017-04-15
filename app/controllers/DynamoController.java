@@ -10,7 +10,11 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class DynamoController extends Controller {
@@ -91,5 +95,74 @@ public class DynamoController extends Controller {
             System.err.println(e.getMessage());
             return ok(e.getMessage());
         }
+    }
+
+    public Result post(String key) {
+        GetItemSpec getItemSpec = new GetItemSpec()
+                .withPrimaryKey("key", key);
+        try {
+            String item = request().body().asText();
+            if(item==null) {
+                Map<String, String[]> form = request().body().asFormUrlEncoded();
+                item = decode((String) form.keySet().toArray()[0]);
+                if(item==null) {return null;}
+            }
+            Item outcome = table.getItem(getItemSpec);
+            Set<String> result = outcome==null ? new HashSet<String>() : outcome.getStringSet("value");
+            System.out.println("result: " + result + " item: " + item);
+            if(item.contains("[") || item.contains("]")) {
+                result.addAll(bodyToList(item));
+            }
+            else {
+                result.add(item);
+            }
+            try {
+                PutItemOutcome putter = table.putItem(new Item()
+                        .withPrimaryKey("key", key)
+                        .withStringSet("value", result));
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+            return ok(result.toString());
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return ok(e.getMessage());
+        }
+    }
+
+    public Result put(String key) {
+        try {
+            String item = request().body().asText();
+            if(item==null) {
+                Map<String, String[]> form = request().body().asFormUrlEncoded();
+                item = decode((String) form.keySet().toArray()[0]);
+                if(item==null) {return null;}
+            }
+            Set<String> result = new HashSet<String>();
+            if(item.contains("[") || item.contains("]")) {
+                result = bodyToList(item);
+            }
+            else {
+                result.add(item);
+            }
+            PutItemOutcome outcome = table.putItem(new Item()
+                    .withPrimaryKey("key", key)
+                    .withStringSet("value", result));
+            return ok(result.toString());
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return ok(e.getMessage());
+        }
+    }
+
+    //Helper Functions
+    public static String decode(String value) throws UnsupportedEncodingException {
+        return URLDecoder.decode(value, "UTF-8");
+    }
+
+    public static Set<String> bodyToList(String body) {
+        body = body.replace("[","").replace("]","");
+        Set<String> result = new HashSet<String>(Arrays.asList(body.split(",")));
+        return result;
     }
 }

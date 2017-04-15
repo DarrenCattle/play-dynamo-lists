@@ -9,3 +9,8 @@ GET			/post/*key/*value			controllers.DynamoController.create(key,value)
 GET			/get/*key					controllers.DynamoController.read(key)
 GET			/put/*key/*value			controllers.DynamoController.update(key,value)
 GET			/delete/*key				controllers.DynamoController.delete(key)
+
+GET         /*key                       controllers.DynamoController.read(key)
+POST        /*key                       controllers.DynamoController.post(key)
+PUT         /*key                       controllers.DynamoController.put(key)
+DELETE      /*key                       controllers.DynamoController.delete(key)
