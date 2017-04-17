@@ -12,10 +12,9 @@ import views.html.index;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DynamoController extends Controller {
 
@@ -162,7 +161,11 @@ public class DynamoController extends Controller {
 
     public static Set<String> bodyToList(String body) {
         body = body.replace("[","").replace("]","");
-        Set<String> result = new HashSet<String>(Arrays.asList(body.split(",")));
+        List<String> mapping = Arrays.asList(body.split(","));
+        Stream<String> stream = mapping.stream().map(item -> {
+            return item.charAt(0) == ' ' ? item.substring(1, item.length()) : item;
+        });
+        Set<String> result = new HashSet<String>(stream.collect(Collectors.toCollection(ArrayList::new)));
         return result;
     }
 }
