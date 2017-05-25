@@ -28,7 +28,7 @@ public class DynamoController extends Controller {
         return ok(index.render());
     }
 
-    public Result create(String key, String value) {
+    public Result create(String key, String value) throws UnsupportedEncodingException {
 
         GetItemSpec getItemSpec = new GetItemSpec()
                 .withPrimaryKey("key", key);
@@ -43,7 +43,7 @@ public class DynamoController extends Controller {
             System.err.println(e.getMessage());
         }
 
-        ss.add(value);
+        ss.add(decode(value));
 
         try {
             PutItemOutcome outcome = table.putItem(new Item()
@@ -74,10 +74,10 @@ public class DynamoController extends Controller {
     public Result update(String key, String value) {
         try {
             Set<String> h = new HashSet<String>();
-            h.add(value);
+            h.add(decode(value));
             PutItemOutcome outcome = table.putItem(new Item()
                     .withPrimaryKey("key", key)
-                    .withStringSet("value", value));
+                    .withStringSet("value", h));
             return ok(h.toString());
         } catch (Exception e) {
             System.err.println(e.getMessage());
