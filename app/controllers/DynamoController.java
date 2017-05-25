@@ -56,6 +56,7 @@ public class DynamoController extends Controller {
     }
 
     public Result read(String key) {
+        response().setHeader("Access-Control-Allow-Origin", "*");
         GetItemSpec getItemSpec = new GetItemSpec()
                 .withPrimaryKey("key", key);
         try {
