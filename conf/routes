@@ -4,6 +4,7 @@
 
 # Default Page
 GET			/							controllers.DynamoController.index
+GET         /lists                      controllers.DynamoController.lists
 # CRUD Operations
 GET			/post/*key/*value			controllers.DynamoController.create(key,value)
 GET			/get/*key					controllers.DynamoController.read(key)

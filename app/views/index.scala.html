@@ -1,4 +1,4 @@
-@()
+@(lists: List[String])
 
 <body>
 <h1>Top Level Methods</h1>
@@ -12,4 +12,11 @@
 <pre>GET         /get/*key</pre>
 <pre>GET         /put/*key/*value</pre>
 <pre>GET         /delete/*key</pre>
+
+<h1>Lists</h1>
+<ul>
+@for(list <- lists) {
+  <li>@list</li>
+}
+</ul>
 </body>

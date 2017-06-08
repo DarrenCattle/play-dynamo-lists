@@ -6,6 +6,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ScanRequest;
+import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
@@ -25,7 +28,26 @@ public class DynamoController extends Controller {
     Table table = dynamoDB.getTable("lists");
 
     public Result index() {
-        return ok(index.render());
+        ScanRequest scanRequest = new ScanRequest().withTableName("lists");
+        ScanResult result = client.scan(scanRequest);
+        List<String> lists = new ArrayList<String>();
+        for (Map<String, AttributeValue> item : result.getItems()){
+            String key = item.get("key").getS();
+            String value = item.get("value").getSS().toString();
+            lists.add(key + " : " + value.substring(0, Math.min(value.length(), 50)));
+        }
+        return ok(index.render(lists));
+    }
+
+    public Result lists() {
+        ScanRequest scanRequest = new ScanRequest().withTableName("lists");
+        ScanResult result = client.scan(scanRequest);
+        List<String> lists = new ArrayList<String>();
+        for (Map<String, AttributeValue> item : result.getItems()){
+            String key = item.get("key").getS();
+            lists.add(key);
+        }
+        return ok(lists.toString());
     }
 
     public Result create(String key, String value) throws UnsupportedEncodingException {
